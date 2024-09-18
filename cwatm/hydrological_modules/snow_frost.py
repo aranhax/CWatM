@@ -365,15 +365,16 @@ class snow_frost(object):
                                     np.maximum((0.85 * 0.94 ** (self.var.SnowAge[i] ** 0.58)),
                                               0.4))
                 
-                SnowAlb = np.minimum(SnowAlb, 0.85)                
+                SnowAlb = np.minimum(SnowAlb, 0.85)
+                # For radiation (RNup, Rsdl, Rsds) there is a conversion from W/m2 to MJ/m2/d
                 RNup = 4.903E-9 * (TavgS + 273.16) ** 4
                 # if only radiation is given like in the EMO meteo dataset:
                 if self.var.only_radiation:
                     RLN = RNup * RSNet
                 else:
                     RLN = RNup - self.var.Rsdl
-                #RN = (self.var.Rsds - RLN) / 334.0
-                RN = (self.var.Rsds* (1 - SnowAlb) - RLN) / 334.0
+                    
+                RN = (self.var.Rsds* (1 - SnowAlb) - RLN) / 334.0 
                 # latent heat of fusion = 0.334 mJKg-1 * desity of water = 1000 khm-3
 
                 SnowMeltS = (TavgS - self.var.TempMelt) * SeasSnowMeltCoef + self.var.SnowMeltRad * RN
@@ -381,6 +382,7 @@ class snow_frost(object):
             else:
                 # without radiation
                 SnowMeltS = (TavgS - self.var.TempMelt) * SeasSnowMeltCoef * (1 + 0.01 * RainS) * self.var.DtDay
+
             SnowMeltS = np.maximum(SnowMeltS, globals.inZero)
 
             # for which layer the ice melt is calculated with the middle temp.
@@ -396,7 +398,9 @@ class snow_frost(object):
             # Check snowcover and snowmelt
             IceMeltS = np.maximum(IceMeltS, globals.inZero)
 
-            SnowIceMeltS = np.maximum(np.minimum(SnowMeltS + IceMeltS + snowIceM_surplus, self.var.SnowCoverS[i]), globals.inZero)
+            SnowIceMeltS = np.maximum(np.minimum(SnowMeltS + IceMeltS + snowIceM_surplus, 
+                                                 self.var.SnowCoverS[i]), 
+                                      globals.inZero)
 
             # snowIceM_surplus: each elevation band snow melt potential is collected -> one way to melt additianl snow which might
             # be colleted in the valley because of snow retribution
