@@ -353,6 +353,7 @@ class snow_frost(object):
             # radiation part from evaporationPot -> snowmelt has now a temperature part and a radiation part
             # from Erlandsen et al. Hydrology Research 52.2 2021
             if self.var.snowmelt_radiation:
+                # R Shrestha and A. Lima: added albedo decay as a function of snow age based on VIC model (Liang et al., 1994)
                 nosnowtoday = (SnowS<0.01).astype(int)
                 # if snowday -> snowage = 0 otherwise it is added up
                 self.var.SnowAge[i] = self.var.SnowAge[i] * nosnowtoday + nosnowtoday
